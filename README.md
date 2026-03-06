@@ -1,9 +1,9 @@
 # 🏦 Resurrection Finance - Secure Banking API
 
-A high-performance, secure banking backend built with **Java 21** and **Spring Boot**. This API manages users, accounts, and atomic transactions with a focus on security and scalability.
+A high-performance, secure banking backend built with **Java 17** and **Spring Boot**. This API manages users, accounts, and atomic transactions with a focus on security and scalability.
 
 ## 🚀 Tech Stack
-*   **Java 21** & **Spring Boot 3.4**
+*   **Java 17** & **Spring Boot**
 *   **Spring Security** (JWT & BCrypt)
 *   **PostgreSQL** (Managed with Docker & Docker Compose)
 *   **Hibernate / JPA** (Data persistence & relations)

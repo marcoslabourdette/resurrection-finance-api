@@ -76,7 +76,7 @@ This system is composed of two services:
 * Broadcasts real-time updates via WebSockets
 
 ## 🧱 System Architecture
-
+```
 User Action (Transfer)
 |
 v
@@ -102,7 +102,7 @@ v
 |
 v
 Real-Time UI Update
-
+```
 ## 🛰️ Event Reliability (Outbox Pattern)
 
 Resurrection Finance utilizes a **Distributed Architecture** to ensure scalability and data integrity.

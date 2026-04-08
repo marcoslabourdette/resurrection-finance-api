@@ -1,5 +1,7 @@
 # 🏦 Resurrection Finance - Event-Driven Banking System
 
+> 🇪🇸 [**Leer versión en Español**](./README.es.md)
+
 A secure and scalable **banking backend** built with Java 21 and Spring Boot, designed using a **distributed event-driven architecture**.
 
 This system handles users, accounts and transactions while guaranteeing **data consistency, fault tolerance and real-time updates** through Apache Kafka and WebSockets.

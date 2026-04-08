@@ -4,6 +4,7 @@ import com.resurrection_finance.dto.AccountResponseDTO;
 import com.resurrection_finance.entity.Account;
 import com.resurrection_finance.entity.User;
 import com.resurrection_finance.repository.AccountRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,6 @@ public class AccountService {
     public AccountResponseDTO createAccount(User user) {
         Account account = new Account();
         account.setUser(user);
-        // Con bono de 100$ :D
         account.setBalance(new BigDecimal("100.00"));
         account.setCvu(generateRandomCvu());
         Account savedAccount = accountRepository.save(account);
@@ -34,6 +34,17 @@ public class AccountService {
         return accountRepository.findByUser(user)
                 .map(acc -> new AccountResponseDTO(acc.getCvu(), acc.getBalance()))
                 .orElseThrow(() -> new RuntimeException("Account not found for user: " + user.getName()));
+    }
+
+    @Transactional(readOnly = true)
+    public AccountResponseDTO getAccountDetailsByEmail(String email) {
+        Account account = accountRepository.findByUserEmail(email).orElseThrow(() -> new EntityNotFoundException("Account not found for email: " + email));
+        return new AccountResponseDTO(account.getCvu(), account.getBalance());
+    }
+
+    @Transactional(readOnly = true)
+    public String getOwnerNameByCvu(String cvu) {
+        return accountRepository.findByCvu(cvu).map(account -> account.getUser().getName()).orElseThrow(() -> new EntityNotFoundException("CVU not found on the track."));
     }
 
     private String generateRandomCvu() {

@@ -42,7 +42,8 @@ public class TransactionServiceTest {
 
         TransactionRequestDTO request = new TransactionRequestDTO(
                 destination.getCvu(),
-                new BigDecimal("30.00")
+                new BigDecimal("30.00"),
+                "Test Transfer"
         );
 
         when(accountRepository.findByUserExternalId(any())).thenReturn(Optional.of(origin));
@@ -63,9 +64,9 @@ public class TransactionServiceTest {
 
         TransactionRequestDTO request = new TransactionRequestDTO(
                 destination.getCvu(),
-                new BigDecimal("30.00")
+                new BigDecimal("30.00"),
+                "Insufficient Balance Test"
         );
-
         when(accountRepository.findByUserExternalId(any())).thenReturn(Optional.of(origin));
         when(accountRepository.findByCvu(any())).thenReturn(Optional.of(destination));
 

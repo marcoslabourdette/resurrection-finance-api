@@ -11,7 +11,10 @@ public record TransactionResponseDTO(
         TransactionType type,
         LocalDateTime timestamp,
         UUID externalId,
-        String destinationCvu
+        String destinationCvu,
+        String description,
+        String senderEmail,
+        String receiverEmail
 ) {
 }
 

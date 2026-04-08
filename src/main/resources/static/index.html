@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <style>
+     #dashboard-section {
+       opacity: 0;
+       transition: opacity 0.3s ease-in-out;
+     }
+     .logged-in #dashboard-section {
+       opacity: 1 !important;
+       display: block !important;
+     }
+     #admin-section {
+       display: none;
+       opacity: 0;
+       transition: opacity 0.3s ease-in-out;
+     }
+     .is-admin #admin-section {
+       display: block !important;
+       opacity: 1 !important;
+     }
+    </style>
+    <script>
+        (function() {
+        const params = new URLSearchParams(window.location.search);
+        const l = params.get("lang");
+        if (l) localStorage.setItem("user_lang", l);
+        if (params.get("action") === "logout") {
+            const savedLang = localStorage.getItem("user_lang") || 'es';
+            localStorage.clear();
+            localStorage.setItem("user_lang", savedLang);
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        const token = params.get("token") || localStorage.getItem("jwt_token");
+        const role = localStorage.getItem('user_role');
+        if (token) {
+            document.documentElement.classList.add('logged-in');
+            if (role && role.includes('ADMIN')) {
+                document.documentElement.classList.add('is-admin');
+            }
+            localStorage.setItem("jwt_token", token);
+            const email = params.get("email"), id = params.get("external_id");
+            if (email) localStorage.setItem("user_email", email);
+            if (id) localStorage.setItem("user_external_id", id);
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        else if (window.location.hash === '#register') {
+            document.documentElement.classList.add('show-register');
+        }
+        else {
+            document.documentElement.classList.add('show-login');
+        }
+        })();
+    </script>
+    <title>Resurrection Finance</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<nav class="main-navbar" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 25px;">
+    <div class="nav-container">
+        <div class="nav-brand">RESURRECTION FINANCE 🏛️</div>
+        <div id="nav-actions-wrapper" class="nav-actions" style="display: none;">
+            <a href="javascript:void(0)" onclick="backToBank()" class="nav-link active" data-i18n="nav_start">INICIO</a>
+            <a href="javascript:void(0)" onclick="goToMessenger()" class="nav-link" data-i18n="nav_notif">NOTIFICACIONES</a>
+            <button onclick="confirmDeleteAccount()" class="nav-btn-danger" data-i18n="nav_delete">ELIMINAR CUENTA 🚨</button>
+            <button onclick="logoutBanco()" class="nav-btn-exit" data-i18n="nav_exit">SALIR</button>
+        </div>
+    </div>
+    <div class="lang-selector">
+        <button onclick="setLanguage('es')" class="btn-lang">ES 🇦🇷</button>
+        <button onclick="setLanguage('en')" class="btn-lang">EN 🇬🇧</button>
+    </div>
+</nav>
+<div id="login-section" class="login-card" style="display: none;">
+    <h2 data-i18n="login_title" style="color: var(--primary-blue); font-weight: 300; margin-bottom: 40px;">🏦 Acceso a la Plataforma</h2>
+    <form onsubmit="event.preventDefault(); handleLogin();">
+        <input type="email" id="email" data-i18n-placeholder="email_label" placeholder="Correo Electrónico" autocomplete="username" maxlength="50" required>
+        <input type="password" id="password" data-i18n-placeholder="password_label" placeholder="Contraseña" autocomplete="current-password" maxlength="100" required>
+        <button class="btn-primary" type="submit" data-i18n="login_btn">INICIAR SESIÓN</button>
+    </form>
+    <div style="margin-top: 25px; font-size: 0.9em; color: #888;">
+        <span data-i18n="no_account">¿Aún no posee una cuenta?</span>
+        <a href="javascript:void(0)" onclick="toggleAuthMode('register')" data-i18n="register_link" style="color: var(--primary-blue); font-weight: bold; text-decoration: none;">Regístrese</a>
+    </div>
+</div>
+<div id="register-section" class="login-card" style="display: none;">
+    <h2 data-i18n="register_title" style="color: #27ae60; font-weight: 300; margin-bottom: 40px;">🏎️ Alta de Usuario</h2>
+    <form onsubmit="event.preventDefault(); handleRegister();">
+        <input type="text" id="reg-name" data-i18n-placeholder="reg_name_label" placeholder="Nombre completo" minlength="2" maxlength="20" required>
+        <input type="email" id="reg-email" data-i18n-placeholder="reg_email_label" placeholder="Correo electrónico" autocomplete="email" maxlength="50" required>
+        <input type="password" id="reg-password" data-i18n-placeholder="password_label" placeholder="Contraseña" autocomplete="new-password" minlength="6" maxlength="100" required>
+        <input type="number" id="reg-income" data-i18n-placeholder="reg_income_label" placeholder="Ingreso mensual $" step="0.01" required>
+        <input type="tel" id="reg-phone" data-i18n-placeholder="reg_phone_label" placeholder="Teléfono de contacto" maxlength="20" required>
+        <input type="text" id="reg-address" data-i18n-placeholder="reg_address_label" placeholder="Domicilio" maxlength="100" required>
+        <button class="btn-primary" style="background: #27ae60;" type="submit" data-i18n="register_btn">REGISTRARSE</button>
+    </form>
+    <div style="margin-top: 25px; font-size: 0.9em; color: #888;">
+        <span data-i18n="already_have_account">¿Ya posee una cuenta?</span>
+        <a href="javascript:void(0)" onclick="toggleAuthMode('login')" data-i18n="login_back_link" style="color: #27ae60; font-weight: bold; text-decoration: none;">Volver al inicio</a>
+    </div>
+</div>
+<div id="dashboard-section" style="display: none;">
+    <div class="header-bunker">
+        <div>
+            <span data-i18n="pilot_id" style="color: #888; font-size: 0.85em; font-weight: bold;">USUARIO IDENTIFICADO</span>
+            <h2 id="pilot-name"></h2>
+        </div>
+    </div>
+    <div style="display: flex; gap: 40px; align-items: flex-start; margin-top: 20px; width: 100%; max-width: 1200px; margin-left: auto; margin-right: auto;">
+        <div style="flex: 1; min-width: 420px;">
+            <div class="transfer-card" style="border-top-color: #2DCC71; text-align: center; min-height: 180px; display: flex; flex-direction: column; justify-content: center;">
+                <small data-i18n="balance_title" style="color: #888; font-weight: bold;">SALDO DISPONIBLE</small>
+                <h1 id="balance-amount" style="color: #004481; margin: 10px 0; min-height: 1.2em;"></h1>
+                <button onclick="copyCVU()" class="btn-secondary" data-i18n="copy_cvu" style="font-size: 0.7em;">COPIAR MI CVU 📋</button>
+            </div>
+            <div class="transfer-card" style="margin-top: 25px; padding: 25px; min-height: 450px;">
+                <h4 data-i18n="recent_movements" style="margin-top: 0; color: var(--primary-blue);">HISTORIAL DE TRANSACCIONES</h4>
+                <div id="recent-movements-list" style="min-height: 380px; display: flex; flex-direction: column; justify-content: flex-start; margin-top: 15px;">
+                    <p data-i18n="loading" style="color: #999;">Cargando registros...</p>
+                </div>
+            </div>
+        </div>
+        <div style="flex: 1.5; min-width: 550px;">
+            <div class="transfer-card" style="padding: 45px; height: 100%; min-height: 400px;">
+                <h3 data-i18n="transfer_title" style="color: var(--primary-blue); margin-top: 0;">REALIZAR TRANSFERENCIA:</h3>
+                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                    <button onclick="setTransferMode('email')" id="btn-email" data-i18n="btn_email" style="background: var(--primary-blue); color: white; border: none; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8em; font-weight: bold;">POR EMAIL 📧</button>
+                    <button onclick="setTransferMode('cvu')" id="btn-cvu" data-i18n="btn_cvu" style="background: #eee; color: #666; border: none; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8em; font-weight: bold;">POR CVU 📋</button>
+                </div>
+                <form onsubmit="event.preventDefault(); handleTransfer();">
+                    <div class="input-group">
+                        <input type="text" id="receiver" oninput="checkReceiver()" data-i18n-placeholder="receiver_placeholder" placeholder="Email del destinatario" required>
+                        <input type="number" id="amount" data-i18n-placeholder="amount_placeholder" placeholder="Monto $" required step="0.01">
+                    </div>
+                    <div id="receiver-preview" style="font-size: 0.8em; color: #27ae60; margin-top: -15px; margin-bottom: 15px; font-weight: 800; min-height: 1.2em; padding-left: 5px;"></div>
+                    <input type="text" id="description" data-i18n-placeholder="desc_placeholder" placeholder="Descripción de la transferencia" style="width: 97%; margin-bottom: 20px; display: block;">
+                    <button id="transfer-btn" class="btn-primary" type="submit" data-i18n="execute_btn">EJECUTAR TRANSFERENCIA SEGURA 🚀</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="admin-section" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+        <div class="transfer-card" style="border-top-color: #004481; padding: 30px;">
+            <h2 data-i18n="admin_panel_title" style="color: var(--primary-blue); margin-bottom: 25px;">📊 Monitoreo de Administrador</h2>
+            <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="admin-search-input" onkeyup="filterAdminUsers()"
+                       data-i18n-placeholder="admin_search_placeholder"  placeholder="🔍 Buscar socio por nombre o email..."
+                       style="flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; font-size: 0.9em;">
+                <span style="color: #888; font-size: 0.8em; font-weight: bold;"><span data-i18n="admin_total">TOTAL</span>: <span id="admin-user-count">0</span></span>
+            </div>
+            <div class="table-responsive">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead style="background: #f8f9fa;">
+                    <tr>
+                        <th style="padding: 12px; border-bottom: 2px solid #eee;" data-i18n="table_user">USUARIO</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #eee;" data-i18n="table_email">EMAIL</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #eee;" data-i18n="table_status">ESTADO</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #eee;" data-i18n="table_actions">ACCIONES</th>
+                    </tr>
+                    </thead>
+                    <tbody id="admin-user-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="bunker-toast"></div>
+<script src="./js/lang.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>

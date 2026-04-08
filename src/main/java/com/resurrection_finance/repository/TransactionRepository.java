@@ -9,5 +9,4 @@ import java.util.UUID;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     Page<Transaction> findByOriginAccountUserExternalIdOrDestinationAccountUserExternalId(UUID originId, UUID destId, Pageable pageable);
-
 }

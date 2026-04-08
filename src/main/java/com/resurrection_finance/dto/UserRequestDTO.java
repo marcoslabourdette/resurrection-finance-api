@@ -1,24 +1,27 @@
 package com.resurrection_finance.dto;
 
-import com.resurrection_finance.enums.Role;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 
 public record UserRequestDTO(
-        @NotBlank(message = "El nombre es obligatorio")
-        @Size(min = 2, max = 20, message = "El nombre debe tener entre 2 y 20 caracteres")
+        @NotBlank(message = "Name is required")
+        @Size(min = 2, max = 20, message = "Name must be between 2 and 20 characters")
         String name,
-        @NotBlank(message = "El email es obligatorio")
-        @Email(message = "Formato de email inválido")
+        @NotBlank(message = "Email is required")
+        @Email(message = "Invalid email format")
+        @Size(max = 50, message = "Email cannot exceed 50 characters")
         String email,
+        @Size(max = 20, message = "Phone cannot exceed 20 characters")
+        @Pattern(regexp = "^[+]?[0-9]*$", message = "Invalid phone format")
         String phone,
+        @Size(max = 100, message = "Address cannot exceed 100 characters")
         String address,
-        @NotBlank(message = "La contraseña es obligatoria")
-        @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
+        @NotBlank(message = "Password is required")
+        @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
         String password,
-        Role role,
-        @NotNull(message = "El ingreso mensual es obligatorio")
-        @DecimalMin(value = "0.0", inclusive = false, message = "El ingreso debe ser mayor a 0")
+        @NotNull(message = "Monthly income is required")
+        @DecimalMin(value = "0.0", inclusive = false, message = "Income must be greater than 0")
+        @DecimalMax(value = "99999999.99", message = "Income exceeds the bunker's security limit")
         BigDecimal monthlyIncome
 ) {}

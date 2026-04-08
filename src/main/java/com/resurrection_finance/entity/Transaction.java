@@ -28,6 +28,8 @@ public class Transaction {
     private TransactionType type;
     @CreationTimestamp
     private LocalDateTime timestamp;
+    @Column(length = 30)
+    private String description;
     @ManyToOne
     @JoinColumn(name = "origin_account_id")
     private Account originAccount;

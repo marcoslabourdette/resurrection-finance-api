@@ -1,4 +1,6 @@
 package com.resurrection_finance.dto;
 
-public record AuthResponseDTO(String token) {
+import java.util.UUID;
+
+public record AuthResponseDTO(String token, UUID externalId, String role, String name) {
 }
